@@ -5,5 +5,5 @@ app = Flask(__name__)
 #CORS(app)
 
 from backend import routes
-from backend import api_gen
+from Api import api_gen
 # later rate limiter

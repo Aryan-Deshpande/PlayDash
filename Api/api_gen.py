@@ -9,7 +9,7 @@ from backend.db import cur, connection
 @app.route('/api/v1/gen',methods=['POST','GET'])
 def genaapikey():
         apiKey = secrets.token_urlsafe(32)
-        cur.execute('INSERT INTO vendor (token) values (%s)',(apiKey,))
+        cur.execute('UPDATE vendor SET token=%s WHERE %s',(apiKey,))
         connection.commit()
     #else:
         return jsonify(apiKey)
