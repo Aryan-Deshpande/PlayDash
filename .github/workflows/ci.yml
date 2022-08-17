@@ -11,10 +11,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions@checkoutv3
+    - uses: actions/checkout@v2
     - name: build image
       run: |
         docker build -t $GITHUB_REPOSITORY:$GITHUB_SHA .
+
 #"""
 #jobs:
  # imagerepo:
