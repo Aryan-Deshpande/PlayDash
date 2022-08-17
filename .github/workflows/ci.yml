@@ -2,18 +2,17 @@ name:  CI
 
 on:
   push: 
-    branch: [ master ]
+    branches: [ master ]
   pull_request:
-    branch: [ master ]
+    branches: [ master ]
 
 
 jobs:
-  build_container_image:
-    runs_on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions@checkoutv3
     - name: build image
-      working_directory: ./
       run: |
         docker build -t $GITHUB_REPOSITORY:$GITHUB_SHA .
 #"""
