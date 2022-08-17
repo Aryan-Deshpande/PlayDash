@@ -1,0 +1,19 @@
+name: manifest
+
+on:
+  pull_request: 
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions@checkoutv3
+      - name: Install kubescape dependencies
+        run: |
+          curl -s https://raw.githubusercontent.com/armosec/kubescape/master/install.sh | /bin/bash
+      - name: Scan the image
+        run: |
+          kubescape scan framework nsa k8/*.yml
