@@ -12,6 +12,10 @@ A mechanism for arranging outdoor sporting events that allows users to reserve t
 
 ## Installation 
 ```sh
+git clone https://github.com/Aryan-Deshpande/PlayDash.git
+```
+Then move into the directory and run the following commands:
+```sh
 pip install -r requirements.txt
 ```
 
