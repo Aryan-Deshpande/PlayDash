@@ -1,11 +1,11 @@
-FROM python:3.10-slim
+FROM python:3.9-slim
 
 WORKDIR /app
 
 COPY . .
 
-RUN pip install -r requirements.txt
-
+RUN \
+python3 -m pip install -r requirements.txt --no-cache-dir
 COPY . /app 
 
 CMD ["flask", "run", "--host=localhost", "--port=80"]
