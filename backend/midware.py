@@ -25,10 +25,13 @@ def createBooking(userId,eventId,eventName): # include later, timeSlot
 def pageApi(eventName):
     cur.execute("SELECT * FROM events WHERE name=%s",(eventName,))
     return cur.fetchone()  # You can also use curr.fetchall() if you have multiple output rows 
+    
 def pageApis():
     cur.execute('SELECT id,name FROM events')
     obj = cur.fetchall()
     return obj
 
-    
+cur.execute('SELECT id FROM vendor WHERE token=%s',('hvz1QMGwW1rrRln-FYeruHOSwYEdXpEDB1mzOecSXrw',))
+a = cur.fetchall()
+print(a[0][0])
 
