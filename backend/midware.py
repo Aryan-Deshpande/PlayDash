@@ -3,12 +3,15 @@ import os
 from backend.db import cur, connection
 
 def checkuser(username,password):
-    
     username,hashed_password = cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username,password))
     unhashed_password = 1 # unhash
     if username and password:
         if password ==  unhashed_password:
             return True
+        else:
+            return False
+    else:
+        return False
 
 def register(username,password):
     try:

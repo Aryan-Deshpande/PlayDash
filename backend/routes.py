@@ -1,5 +1,5 @@
 from backend import app
-from flask import render_template, redirect, url_for, request, flash, jsonify, make_response
+from flask import request, jsonify, make_response, render_template, session, redirect 
 from backend.midware import checkuser, register, createBooking, pageApi, pageApis
 from backend.db import cur
 
@@ -7,16 +7,27 @@ from backend.db import cur
 def register():
     if request.method == 'POST':
         if register(request.json['username'],request.json['password']):
-            return jsonify("success")
+            session[request.json['username']]
+        else:
+            make_response({'missing username or password'})
     else:
         return render_template('register.html')
 
 @app.route('/login',methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        checkuser(request.json['username'],request.json['password'])
+        if checkuser(request.json['username'],request.json['password']):
+            session[request.json['username']]
+            redirect('/events')
+        else:
+            make_response({'Wrong password or user does not exist'})
     else:    
         return render_template('login.html')
+
+@app.route('/logout',methods=['POST'])
+def logout():
+    session[session.get("name")] = None
+    redirect('/login')
 
 # create a booking for a particular event
 @app.route('/event/Booking', methods=['POST'])
@@ -48,4 +59,6 @@ def eventPage(eventName):
         usesId = True
     return jsonify(eventId,eventName,usesId)
 
-
+@app.route('/test',methods=['GET'])
+def test():
+    return jsonify('success', 403)
