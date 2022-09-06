@@ -6,3 +6,7 @@ metadata:
 spec: # clusterIP, loadBalancer ( CLOUD LOADBALANCER ), nodePort
   selector:
     app: playdep  
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 5000

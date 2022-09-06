@@ -21,7 +21,7 @@ spec:
       - name: playdep
         image: playdash
         ports:
-        - containerPort: 80
+        - containerPort: 5000
           protocol: TCP
         imagePullPolicy: Never
         resources:
