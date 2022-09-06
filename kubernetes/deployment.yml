@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: playdep 
+
+spec:
+  replicas: 1
+  
+  selector:
+    matchLabels:
+      app: playdep
+  
+  template:
+    
+    metadata:
+      labels:
+        app: playdep
+    
+    spec:
+      containers:
+      - name: playdep
+        image: playdash
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        imagePullPolicy: Never
+        resources:
+          limits:
+            cpu: 0.2m
+            memory: 128Mi
+
