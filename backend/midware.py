@@ -59,7 +59,8 @@ def createBooking(userId,eventId,eventName): # include later, timeSlot
 # get page details
 def pageFunc(eventName):
     cur.execute("SELECT * FROM events WHERE name=%s",(eventName,))
-    return cur.fetchone()  # You can also use curr.fetchall() if you have multiple output rows 
+    result = cur.fetchone()
+    return result  # You can also use curr.fetchall() if you have multiple output rows 
     
 def pageFuncs():
     cur.execute('SELECT id,name FROM events')

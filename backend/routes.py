@@ -1,4 +1,6 @@
 import json
+from pickle import TRUE
+from sre_constants import SUCCESS
 from yaml import load
 from backend import app
 from flask import request, jsonify, make_response, render_template, session, redirect 
@@ -48,29 +50,32 @@ def logout():
     redirect('/login')
 
 # Tested, create a booking for a particular event
-@app.route('/event/Booking',methods=['POST'])
+@app.route('/event/Booking',methods=['GET','POST'])
 def Booking():
-    if session.get('name'): # checks if a user exists in the session 
-    
-        eventId, eventName, userId = request.json['eventId'], request.json['eventName'], session['name']
-        #    timeSlot = request.json['timeSlot'] later implementation
 
-        if not session.get("name") and request.json['usesid'] != None:
-            return jsonify({"Already booked"})
-        elif session.get("name") == request.json['usesid'] != None:
-            return jsonify({"Already booked"})
-        elif session.get("name") and request.json['usesid'] != None:
-            return jsonify({"Already booked"})
-        else:
-            try:
-                createBooking(userId,eventId,eventName)
-                return redirect('/events')
+    if request.method == "POST":
+        if session.get('name'): # checks if a user exists in the session 
+            print(request.data)
 
-            except:
-                return jsonify({"Error in booking"})
+            eventId, eventName, usesId = request.json['eventId'], request.json['eventName'], session['name']
+            #    timeSlot = request.json['timeSlot'] later implementation
 
-    return redirect('/events')
+            if request.json['booking'] == True and session["name"] == request.json['usesid'] != None:
+                return jsonify({"Your booking"})
 
+            elif request.json['booking'] == True and not session.get("name") and request.json['usesid'] != None:
+                return jsonify({"Already booked"})
+
+            else:
+                try:
+                    createBooking(usesId,eventId,eventName)
+                    return redirect(f'/event/{eventName}')
+
+                except:
+                    return redirect(f'/event/{eventName}')
+
+        return redirect('/events')
+    return render_template('temp.html')
 
 
 # Tested, list all the events available
@@ -91,21 +96,32 @@ def events():
     return jsonify(eventObject) 
 
 # Tested, specific event page info
-@app.route('/event/<string:eventName>',methods=['GET'])
+@app.route('/event/<string:eventName>', methods=['GET'])
 def eventPage(eventName):
-    userId = session["name"]
+    print(session['name'])
+    if session.get('name'):
+        userId = session["name"]
 
-    # (eventId, eventName, usesId)
-    event_content = pageFunc(eventName) # if uses id exists then remove booking functionality from webpage
-    eventId,eventName,usesId = event_content[0],event_content[1],event_content[2]
+        event_content = pageFunc(eventName) # if uses id exists then remove booking functionality from webpage
 
-    if usesId == None:
-        return 'available'
-    elif usesId == session.get("name"):
-        return 'your booking'
-    else:
-        return jsonify(session.get("name"), usesId)
+        if event_content is not None:
+            print(event_content)
+            eventId,eventName,usesId = event_content[0],event_content[1],event_content[2]
 
+            if usesId == None:
+                return jsonify({"eventId": eventId, "eventName": eventName, "usesId": usesId, "booked":False,"recipient":False})
+            elif usesId == session["name"]:
+                return jsonify({"eventId": eventId, "eventName": eventName, "usesId": usesId, "booked":True,"recipient":True})
+            else:
+                return jsonify({"eventId": eventId, "eventName": eventName, "usesId": usesId, "booked":True,"recipient":False})
+        
+        return jsonify(' Page Does Not Exist Yet :( ')
+    return redirect('/login')
+
+# Only for testing 
+@app.route('/',methods=['GET'])
+def test():
+    return jsonify('this works right here')
 
     """res = checkbooking(userId,eventId) 
     if res is True:
@@ -115,20 +131,16 @@ def eventPage(eventName):
     else:   
         return jsonify({eventId,eventName,usesId},{"booked":False,"recipient":False})"""
 
-### SERVING HTML PAGES ###
+
+"""### SERVING HTML PAGES ###
 @app.route('/allevents', methods=['GET'])
 def allevents():
     pass
     return render_template('landing')
 
-@app.route('/event/{eventName}', methods=['GET'])
+@app.route('/event/<string:eventName>', methods=['GET'])
 def event():
 #    pass
     return render_template('event')
-
-# Only for testing 
-@app.route('/',methods=['GET'])
-def test():
-    return jsonify('this works right here')
-
+"""
 
