@@ -5,13 +5,16 @@ from backend.db import cur, connection #add backend.db
 def checkuser(username,password):
     if username and password:
         cur.execute("SELECT id FROM uses WHERE name=%s AND password=%s", (username,password))
-        if cur.fetchone() is not None:
-            print('in here')
+        id = cur.fetchone()[0]
+        
+        if id is not None:
+            print(id, 'id displayed')
             cur.execute("SELECT name FROM uses WHERE name=%s AND password=%s", (username,password))
+
             # unhash the password
             unhpassword = password
             if password == unhpassword:
-                return True
+                return id
             else:
                 return False
         else:
@@ -19,14 +22,17 @@ def checkuser(username,password):
     return False
 
 def register(username,password):
-    obj1 = cur.execute('SELECT name FROM uses WHERE name=%s',(username,))
-    if obj1 is None:
+    cur.execute('SELECT name FROM uses WHERE name=%s',(username,))
+    if cur.fetchone()[0] is None:
         try:
             obj = cur.execute("INSERT INTO uses (name,password) values (%s,%s)", (username,password))
-            print(obj)
             connection.commit()
-            return True
+
+            cur.execute('SELECT id FROM uses WHERE name=%s', (username,))
+            print(cur.fetchone(),"Nnone")
+            return cur.fetchone()[0]
         except:
+            print('exception')
             return False
     return False
 
