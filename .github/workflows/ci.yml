@@ -16,13 +16,3 @@ jobs:
       run: |
         docker build -t appimage .
 
-#"""
-#jobs:
- # imagerepo:
-    #runs_on: ubuntu-latest
-    #steps:
-    #- uses: actions@checkoutv3
-    #- name: push_image
-   #   working_directory: ./
- #     run: |
-#        docker push #GITHUB_REPOSITORY:$GITHUB_SHA  """
