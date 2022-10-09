@@ -2,7 +2,10 @@ name: push_image
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
 
 jobs:
   push_image:
@@ -13,6 +16,11 @@ jobs:
     - name: get tag
       id: tag
       uses: dawidd6/action-get-tag@v1
+
+    - name: build
+      run: |
+        docker build -t Neo .
+        docker tag ${{ steps.tag.outputs.tag }} ${{ steps.tag.outputs.tag }}
 
     - name: login
       uses: docker/login-action@v1
@@ -33,5 +41,5 @@ jobs:
       run: |
         wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb 
         sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
-        trivy 
+        trivy image --exit-code 1 --severity HIGH,CRITICAL ${{ secrets.ACR_ENDPOINT }}
 
