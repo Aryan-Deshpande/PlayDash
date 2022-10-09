@@ -3,7 +3,7 @@ A mechanism for arranging outdoor sporting events that allows users to reserve t
 
 # Features
 - Facilitates reservation system for outdoor sporting events
-- External APIs for vendors to receive data from the source of truth
+- External APIs for vendors to receive data from the source of truth.
 - View available turf for a given event.
 
 # Tech Stack
