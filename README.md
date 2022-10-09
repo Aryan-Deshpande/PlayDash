@@ -26,7 +26,7 @@ flask run --port=80 --host=localhost
 
 ## Hosting
 
-Azure Kubernetes Service
+Azure Kubernetes Service |
 
 Workflow
 /assets/images/PlayDash.png
