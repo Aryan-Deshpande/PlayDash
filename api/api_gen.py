@@ -3,9 +3,7 @@ import json
 import secrets
 
 from flask import jsonify, request, abort
-from ..backend import app
-from backend import app
-from backend.db import cur, connection
+from backend import app, cur, connection
 
 from werkzeug.exceptions import BadRequest, HTTPException
 
@@ -24,7 +22,7 @@ def handle_badreq(w):
 # Added a custom exception handler & responder
 def requires_apikey(func):
     
-    @wraps(genaapikey)
+    @wraps(func)
 
     def check_apikey(*args,**kwargs):
         exists = request.headers.get('HTTP_X_API_KEY')
@@ -36,14 +34,16 @@ def requires_apikey(func):
                 obj = cur.fetchone()
 
                 if obj is None:
-                    abort(404,'apiKey does not exist')
+                    abort(404,'apiKey does not exist, create a token first')
 
             except:
                 return abort(404, 'oops something is wrong with the server sorry !')
+        return func(*args,**kwargs)
+    return check_apikey
+        
 
             
 @app.route('/api/v1/gen',methods=['POST','GET'])
-@requires_apikey
 def genaapikey(apiKey):
         if (request.json['username'] is not None) and (request.json['password'] is not None):
             uname = request.json['username']
@@ -66,6 +66,7 @@ def genaapikey(apiKey):
 
 # api for the particular vendor
 @app.route('/api/v1/getdata', methods=['GET'])
+@requires_apikey
 def getdata():
     if request.headers['HTTP_X_API_KEY']:
         data = {}
@@ -90,6 +91,6 @@ def getdata():
             return jsonify(data)
 
     else:
-        return jsonify({'Resource denied'},403) # or aboort(403, 'resource denied')
+        return jsonify( {'Resource denied'},403 ) # or aboort(403, 'resource denied')
 
 ################ fix schema ################
