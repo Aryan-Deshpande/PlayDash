@@ -1,12 +1,9 @@
-import json
-from pickle import TRUE
-from sre_constants import SUCCESS
-from yaml import load
 from backend import app
-from flask import request, jsonify, make_response, render_template, session, redirect 
 from backend.midware import checkuser, createBooking, pageFunc, pageFuncs, checkbooking
 from backend.midware import register as registering
 from backend.db import cur
+
+from flask import request, jsonify, make_response, render_template, session, redirect 
 
 # Tested, it should register following user, and create session for that user
 @app.route('/register',methods=['GET','POST'])
@@ -29,8 +26,6 @@ def register():
 @app.route('/login',methods=['GET','POST'])
 def login():
     if request.method == 'POST':
-        #if not session.get('name'):
-            #return redirect('/events')
 
         username = request.form['username']
         print(username, request.form['password'])
@@ -54,26 +49,35 @@ def logout():
 def Booking():
 
     if request.method == "POST":
+        
         if session.get('name'): # checks if a user exists in the session 
-            print(request.data)
+            print('in session')
 
             eventId, eventName, usesId = request.json['eventId'], request.json['eventName'], session['name']
             #    timeSlot = request.json['timeSlot'] later implementation
+            print(eventId,eventName,usesId)
 
-            if request.json['booking'] == True and session["name"] == request.json['usesid'] != None:
+            if request.json['booking'] == True and session["name"] == request.json['usesid']:
                 return jsonify({"Your booking"})
 
-            elif request.json['booking'] == True and not session.get("name") and request.json['usesid'] != None:
+            elif request.json['booking'] == True and session.get("name") and session["name"] != request.json['usesid']:
+                return jsonify({"Already booked"})
+
+            elif request.json['booking'] == True and not session.get("name"):
                 return jsonify({"Already booked"})
 
             else:
                 try:
-                    createBooking(usesId,eventId,eventName)
-                    return redirect(f'/event/{eventName}')
+                    if createBooking(usesId,eventId,eventName):
+                        return redirect(f'/event/{eventName}')
+                    else:
+                        return 'error in the backend'
 
                 except:
                     return redirect(f'/event/{eventName}')
 
+        #print('outside session')
+        
         return redirect('/events')
     return render_template('temp.html')
 
@@ -98,7 +102,7 @@ def events():
 # Tested, specific event page info
 @app.route('/event/<string:eventName>', methods=['GET'])
 def eventPage(eventName):
-    print(session['name'])
+    #print(session['name'])
     if session.get('name'):
         userId = session["name"]
 

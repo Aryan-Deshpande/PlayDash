@@ -1,6 +1,6 @@
 import psycopg2
 import os
-from backend.db import cur, connection #add backend.db
+from backend import cur, connection #added backend.db
 
 def checkuser(username,password):
     if username and password:
@@ -29,7 +29,7 @@ def register(username,password):
             connection.commit()
 
             cur.execute('SELECT id FROM uses WHERE name=%s', (username,))
-            print(cur.fetchone(),"Nnone")
+            print(cur.fetchone(),"None")
             return cur.fetchone()[0]
         except:
             print('exception')
@@ -38,17 +38,20 @@ def register(username,password):
 
 def createBooking(userId,eventId,eventName): # include later, timeSlot
     # check if user has event already booked
-    cur.execute("SELECT id FROM uses WHERE name=%s",(userId,))
+    
+    """cur.execute("SELECT id FROM uses WHERE name=%s",(userId,))
     query1 = cur.fetchone()
     print(cur.fetchone())
-    userId = query1.item()
-    obj1 = cur.execute('SELECT id FROM events WHERE usesid=%s',(userId,))
-    print(obj1.fetchone())
-    if obj1.fetchone()[0] is not None:
-        return False
+    userId = query1.item()"""
+
+    cur.execute('SELECT id FROM events WHERE name=%s',(eventName,))
+    item = cur.fetchone()
+
+    print(item, ' item ')
 
     try:
         print(userId)
+        
         obj = cur.execute("UPDATE events SET usesid=%s WHERE id=%s AND name=%s", (userId,eventId,eventName))
         connection.commit()
         return True
