@@ -1,5 +1,5 @@
 # **`PLAYDASH`**
-A mechanism for arranging outdoor sporting events that allows users to reserve turf. enables suppliers to receive data from the source of truth through external APIs.
+A web application for arranging outdoor sporting events that allows users to reserve turf. enables suppliers to receive data from the source of truth through external APIs.
 
 ## **FEATURES**
 - Facilitates reservation system for outdoor sporting events
