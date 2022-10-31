@@ -7,8 +7,14 @@ A web application for arranging outdoor sporting events that allows users to res
 - View available turf for a given event. .
 
 ## **TECH STACK**
-- Python / Flask
+- Python 
+- Flask
 - PostgresSQL
+- Azure
+- Docker
+- Kubernetes
+- Github Actions
+- (React) - Future
 
 <br>
 
