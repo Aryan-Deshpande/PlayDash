@@ -1,7 +1,7 @@
 from backend import app
 from backend.midware import checkuser, createBooking, pageFunc, pageFuncs, checkbooking
 from backend.midware import register as registering
-from backend.db import cur
+from backend import cur
 
 from flask import request, jsonify, make_response, render_template, session, redirect 
 

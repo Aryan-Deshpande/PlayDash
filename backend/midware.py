@@ -2,6 +2,7 @@ import psycopg2
 import os
 from backend import cur, connection #added backend.db
 
+# 
 def checkuser(username,password):
     if username and password:
         cur.execute("SELECT id FROM uses WHERE name=%s AND password=%s", (username,password))
@@ -21,6 +22,7 @@ def checkuser(username,password):
             return False
     return False
 
+# registers a user
 def register(username,password):
     cur.execute('SELECT name FROM uses WHERE name=%s',(username,))
     if cur.fetchone()[0] is None:
@@ -36,6 +38,7 @@ def register(username,password):
             return False
     return False
 
+# creates a booking by mapping user to the event id
 def createBooking(userId,eventId,eventName): # include later, timeSlot
     # check if user has event already booked
     
