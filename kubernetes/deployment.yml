@@ -19,13 +19,14 @@ spec:
     spec:
       containers:
       - name: playdep
-        image: playdash
+        image: crnneo.azurecr.io/neo
         ports:
         - containerPort: 5000
           protocol: TCP
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         resources:
           limits:
-            cpu: 0.2m
+            cpu: 100m
             memory: 128Mi
-
+      imagePullSecrets:
+       - name: regcred

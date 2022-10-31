@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta
+kind: Ingress
+metadata:
+  name: nginx
+  annotations: 
+  labels:
+    name: nginx
+spec:
+  tls:
+    - secretName: joebunga-com-tls
+      hosts: 
+        - joebunga.com
+  rules:
+  - host: joebunga.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/*"
+        backend:
+          service:
+            name: playservice
+            port: 
+              number: 8080
