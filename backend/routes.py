@@ -9,7 +9,7 @@ from flask import request, jsonify, make_response, render_template, session, red
 @app.route('/register',methods=['GET','POST'])
 def register():
     if request.method == 'POST':
-        register_status = registering(request.form['username'],request.form['password'])
+        register_status = registering(request.json['username'],request.json['password'])
         print(register_status)
 
         if register_status != None or register_status != False:
@@ -42,32 +42,36 @@ def login():
 @app.route('/logout',methods=['POST'])
 def logout():
     session["name"] = None
-    redirect('/login')
+    return redirect('/login')
 
 # Tested, create a booking for a particular event
 @app.route('/event/Booking',methods=['GET','POST'])
 def Booking():
 
     if request.method == "POST":
-        
+        print('hey1')
         if session.get('name'): # checks if a user exists in the session 
             print('in session')
-
+            print('hey2')
             eventId, eventName, usesId = request.json['eventId'], request.json['eventName'], session['name']
             #    timeSlot = request.json['timeSlot'] later implementation
             print(eventId,eventName,usesId)
 
             if request.json['booking'] == True and session["name"] == request.json['usesid']:
+                print('hey3')
                 return jsonify({"Your booking"})
 
             elif request.json['booking'] == True and session.get("name") and session["name"] != request.json['usesid']:
+                print('hey4')
                 return jsonify({"Already booked"})
 
             elif request.json['booking'] == True and not session.get("name"):
+                print('he5')
                 return jsonify({"Already booked"})
 
             else:
                 try:
+                    print('hey')
                     if createBooking(usesId,eventId,eventName):
                         return redirect(f'/event/{eventName}')
                     else:

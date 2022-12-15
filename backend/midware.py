@@ -25,7 +25,7 @@ def checkuser(username,password):
 # registers a user
 def register(username,password):
     cur.execute('SELECT name FROM uses WHERE name=%s',(username,))
-    if cur.fetchone()[0] is None:
+    if cur.fetchone() is None:
         try:
             obj = cur.execute("INSERT INTO uses (name,password) values (%s,%s)", (username,password))
             connection.commit()
