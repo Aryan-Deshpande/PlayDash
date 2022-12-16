@@ -1,7 +1,6 @@
 from backend import app
 from backend.midware import checkuser, createBooking, pageFunc, pageFuncs, checkbooking
 from backend.midware import register as registering
-from backend import cur
 
 from flask import request, jsonify, make_response, render_template, session, redirect 
 
@@ -83,6 +82,7 @@ def Booking():
         #print('outside session')
         
         return redirect('/events')
+
     return render_template('temp.html')
 
 
@@ -101,13 +101,16 @@ def events():
     for i,event in enumerate(eventPages): # Creates a new dict key with the following event details
         (eventId,eventName) = event
         eventObject[i] = [eventId,eventName]    
-    return jsonify(eventObject) 
+
+    return jsonify({'events':eventObject}) 
 
 # Tested, specific event page info
 @app.route('/event/<string:eventName>', methods=['GET'])
 def eventPage(eventName):
+
     #print(session['name'])
     if session.get('name'):
+
         userId = session["name"]
 
         event_content = pageFunc(eventName) # if uses id exists then remove booking functionality from webpage
@@ -123,32 +126,12 @@ def eventPage(eventName):
             else:
                 return jsonify({"eventId": eventId, "eventName": eventName, "usesId": usesId, "booked":True,"recipient":False})
         
-        return jsonify(' Page Does Not Exist Yet :( ')
-    return redirect('/login')
+        return jsonify({'error':'Page Does Not Exist Yet :( '})
+
+    return redirect('/login')    
 
 # Only for testing 
 @app.route('/',methods=['GET'])
 def test():
     return jsonify('this works right here')
-
-    """res = checkbooking(userId,eventId) 
-    if res is True:
-        return jsonify({eventId,eventName,usesId},{"booked":True,"recipient":True})
-    elif res["recipient"] == False:
-        return jsonify({eventId,eventName,usesId},{"booked":True,"recipient":res["recipient"]})
-    else:   
-        return jsonify({eventId,eventName,usesId},{"booked":False,"recipient":False})"""
-
-
-"""### SERVING HTML PAGES ###
-@app.route('/allevents', methods=['GET'])
-def allevents():
-    pass
-    return render_template('landing')
-
-@app.route('/event/<string:eventName>', methods=['GET'])
-def event():
-#    pass
-    return render_template('event')
-"""
 
