@@ -45,7 +45,7 @@ def logout():
 
 # Tested, create a booking for a particular event
 @app.route('/event/Booking',methods=['GET','POST'])
-def Booking():
+def booking():
 
     if request.method == "POST":
         print('hey1')
