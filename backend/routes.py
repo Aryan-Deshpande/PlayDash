@@ -2,7 +2,8 @@ from backend import app
 from backend.midware import checkuser, createBooking, pageFunc, pageFuncs, checkbooking
 from backend.midware import register as registering
 
-from flask import request, jsonify, make_response, render_template, session, redirect 
+from flask import request, jsonify, make_response, render_template, redirect, session
+from flask_session import Session
 
 # Tested, it should register following user, and create session for that user
 @app.route('/register',methods=['GET','POST'])
@@ -83,7 +84,7 @@ def booking():
         
         return redirect('/events')
 
-    return render_template('temp.html')
+    return render_template('events.html')
 
 
 # Tested, list all the events available
