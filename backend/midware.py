@@ -73,7 +73,7 @@ def createBooking(userId,eventId,eventName): # include later, timeSlot
     print(cur.fetchone())
     userId = query1.item()"""
 
-    cur.execute('SELECT id FROM e WHERE name=%s',(str(eventName,)) )
+    cur.execute('SELECT id FROM e WHERE name=%s',(str(eventName),) )
     item = cur.fetchone()
 
     print(item, ' item ')
@@ -81,16 +81,19 @@ def createBooking(userId,eventId,eventName): # include later, timeSlot
     try:
         print(userId)
         
-        obj = cur.execute("UPDATE e SET usesid=%s WHERE id=%s AND name=%s", (userId,eventId,str(eventName)) )
+        obj = cur.execute("UPDATE u SET eventid=%s WHERE id=%s", (eventId,userId))
         connection.commit()
         return True
-    except:
+
+    except Exception as e:
+        connection.rollback()
+        print(e)
         return False
 
 
 # get page details
 def pageFunc(eventName):
-    cur.execute("SELECT * FROM e;",(str(eventName,)) )
+    cur.execute("SELECT * FROM e WHERE name=%s",(str(eventName),) )
     result = cur.fetchone()
     return result  # You can also use curr.fetchall() if you have multiple output rows 
     
@@ -101,15 +104,24 @@ def pageFuncs():
 
 def checkbooking(userId, eventId):
     try:
-        cur.execute('SELECT usesid FROM events WHERE id=%s',(eventId,))
-        if cur.fetchone()[0] is not None:
-            if cur.fetchone()[0] == userId:
+        cur.execute('SELECT eventid FROM u WHERE id=%s',(userId,))
+        result = cur.fetchone()
+        print(result, "result")
+        print(eventId, "eventId")
+
+        if result[0] is not None:
+
+            if result[0] == eventId:
                 return True
+
             else:
-                return {"recipient":False} 
+                return False
         else:
             return False
-    except:
+
+    except Exception as e:
+        connection.rollback()  
+        print(e)
         return False
 
 

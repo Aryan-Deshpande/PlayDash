@@ -1,55 +1,77 @@
 # doesnt have central storage for session, each route has its own checking
 
-from backend import app
+from backend import app, r
 from backend.midware import checkuser, createBooking, pageFunc, pageFuncs, checkbooking
 from backend.midware import register as registering
 
-from flask_session import SessionInterface
-from flask import request, jsonify, make_response, render_template, redirect, session
+from flask import request, jsonify, make_response, render_template, redirect
 
-
-# gets the session data from the session store
-def get_session_data(session_id):
-  # Get the session interface
-  session_interface = SessionInterface()
-
-  # Get the session data from the session store
-  session_data = session_interface.get_session_data(session_id)
-
-  return session_data
+import secrets
+import json
 
 # Tested, it should register following user, and create session for that user
 @app.route('/register',methods=['POST'])
 def register():
 
     if request.method == 'POST':
-        register_status = registering(request.json['username'],request.json['password'])
+
+        # registers the user and returns the userid if successful
+        register_status = registering(request.form.get('username'),request.form.get('password'))
         print(register_status)
 
+        # if the user is registered, then it creates a session for the user
         if register_status != None or register_status != False:
-            session['name'] = register_status
+            
+            # generates the sessionId for the user
+            sessionId = secrets.token_hex(16)
+            #print(sessionId + "session id")
 
-            sessionId = request.cookies.get('session')
+            # creates a session for the user
+            session_data = {'name': register_status}
+
+            # serializes the session data
+            session_serialize = json.dumps(session_data)
+
+            # sets the session data to expire in 1 hour
+            r.expire(sessionId, 3600)
+
+            # sets the session data to the sessionId in the redis database
+            r.set(sessionId, session_serialize)
 
             return jsonify({'result':True, 'sessionId':sessionId})
         else:
             return jsonify({'result':False})
-            
-        # return render_template('register.html') // not needed, since implementing react
 
 # Tested, it should login a user and redirect to a url
 @app.route('/login',methods=['POST'])
 def login():
+
     if request.method == 'POST':
                                     
-        login_status = checkuser(request.form.get('username'),request.form.get('password'))
+        # checks if the user exists and returns the userid if successful
+        login_status = checkuser(request.form['username'],request.form['password'])
         print(login_status, "login status")
 
+        # if the user exists, then it creates a session for the user
         if login_status !=False:
-            print(login_status, 'in check')
-            session["name"] = login_status
 
-            sessionId = request.cookies.get('session')
+            # generates the sessionId for the user
+            sessionId = secrets.token_hex(16)
+
+            # creates a session for the user
+            print(sessionId + "session id")
+
+            # creates a session for the user
+            session_data = {'name': login_status}
+
+            # serializes the session data
+            session_serialize = json.dumps(session_data)
+
+            # sets the session data to expire in 1 hour
+            r.expire(sessionId, 3600)
+
+            # sets the session data to the sessionId in the redis database
+            r.set(sessionId, session_serialize)
 
             return jsonify({'result':True, 'sessionId':sessionId})
         else:
@@ -59,64 +81,50 @@ def login():
 @app.route('/logout',methods=['POST'])
 def logout():
 
-    session.clear()
-    return jsonify({'result':True})
+    if request.method == 'POST':
+        
+        # remove sessions from redis
+        sessionId = request.headers.get('sessionId')
+        r.delete(sessionId)
+
+        return jsonify({'result':True})
 
 # Tested, create a booking for a particular event
 @app.route('/event/Booking',methods=['POST'])
 def booking():
 
     if request.method == "POST":
-        
+
+        # retrieval of the session id from the header
         sessionId = request.headers.get('sessionId')
-        sessiondata = get_session_data(sessiondata)
 
-        if not sessiondata:
+        # check if the session id is valid
+        if not r.get(sessionId):
             return jsonify({'error':'Unauthorized'}), 400
+
         else:
-            eventId, eventName, usesId = request.json['eventId'], request.json['eventName'], session['name']
-            #    timeSlot = request.json['timeSlot'] later implementation
-            #print(eventId,eventName,usesId)
 
-            if request.json['booking'] == True and session["name"] == request.json['usesid']:
-                #print('hey3')
-                return jsonify({"Your booking"})
+            # retrieval of the value of the sessionId key
+            session_data = r.get(sessionId)
 
-            elif request.json['booking'] == True and session.get("name") and session["name"] != request.json['usesid']:
-                #print('hey4')
-                return jsonify({"Already booked"})
+            # deserialization of the session data
+            session = json.loads(session_data)
 
-            elif request.json['booking'] == True and not session.get("name"):
-                #print('he5')
-                return jsonify({"Already booked"})
+            eventId, eventName, userId = request.json['eventId'], request.json['eventName'], session['name']
+
+            # create booking, and return the status of the booking
+            booking_status = createBooking(userId, eventId, eventName)
+            #print(booking_status)
+
+            if booking_status == True:
+                return jsonify({'result':True})
 
             else:
-                try:
-                    #print('hey')
-                    if createBooking(usesId,eventId,eventName):
-                        return redirect(f'/event/{eventName}')
-                    else:
-                        return 'error in the backend'
-
-                except:
-                    return redirect(f'/event/{eventName}')
-
-        #print('outside session')
-        #return redirect('/events')
-        return jsonify({'res':False})
+                return jsonify({'result':False})
 
 # Tested, list all the events available
 @app.route('/events',methods=['GET'])
 def events():
-
-    # retrival of sessionId through the request headers
-    sessionId = request.headers.get('sessionId')
-
-    # Retrieve the session data from the session store
-    sessiondata = get_session_data(sessionId)
-
-    if not sessiondata:
-        return jsonify({'error':'Unauthorized'}), 400
 
     # JSON object to be appended and returned to the URI call
     eventObject = [] 
@@ -129,39 +137,51 @@ def events():
 
         (eventId,eventName,eventDate) = event
         eventObject.append({'eventId':eventId,'eventName':eventName,'eventDate':eventDate})    
-    print({'events':f'{eventObject}'})
+    
+    #print({'events':f'{eventObject}'})
     return eventObject  
 
 # Tested, specific event page info
 @app.route('/event/<string:eventName>', methods=['GET'])
 def eventPage(eventName):
 
-    session_id = request.headers.get('sessionId')
-    session_data = get_session_data(session_id)
+    # get sessionId from the header of the response
+    sessionId = request.headers.get('sessionId')
 
-    # if uses id exists then remove booking functionality from webpage
-    event_content = pageFunc(eventName) 
+    # if the sessionId key does not exist in the Redis cache, then return error
+    if not r.get(sessionId):
+            return jsonify({'error':'Unauthorized'}), 400
 
-    if event_content is not None:
-        print(event_content)
-        eventId,eventName,eventDate = event_content[0],event_content[1],event_content[2]
+    # if the sessionId key does exist in the redis cache
+    else:
 
-        return jsonify({"eventId": eventId, "eventName": eventName, "eventDate": eventDate})
+            # retrieval of the value of the sessionId key
+            session_data = r.get(sessionId)
+
+            # deserialization of the value
+            session = json.loads(session_data)
     
-    """if usesId == None:
-                return jsonify({"eventId": eventId, "eventName": eventName, "booked":False,"recipient":False})
-            elif usesId == session["name"]:
-                return jsonify({"eventId": eventId, "eventName": eventName, "booked":True,"recipient":True})
+            # retrieval of the event content based on url parameters
+            event_content = pageFunc(eventName) 
+
+            # if the event content is not None, then return the event content
+            if event_content is not None:
+                print(event_content , "event content")
+                eventId,eventName,eventDate = event_content[0],event_content[1],event_content[2]
+
+                # check if the user has already booked the event through postgreSQL querying
+                # returns TRUE or FALSE bade on the query
+                if checkbooking(session['name'],eventId) == True:
+                    return jsonify({'eventId':eventId,'eventName':eventName,'eventDate':eventDate,'booked':True})
+                else:
+                    return jsonify({'eventId':eventId,'eventName':eventName,'eventDate':eventDate,'booked':False})
+
+            # if no content for the event is returned, then return error
             else:
-                return jsonify({"eventId": eventId, "eventName": eventName, "booked":True,"recipient":False})
-        
-    return jsonify({'error':'Page Does Not Exist Yet :( '})"""
-
-
-    #return redirect('/login')    
+                return jsonify({'error':'event not found'}), 400
 
 # Only for testing 
 @app.route('/',methods=['GET'])
 def test():
-    return jsonify('this works right here')
+    return jsonify({'res':'this works right here'})
 
