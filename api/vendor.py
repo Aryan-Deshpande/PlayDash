@@ -81,31 +81,38 @@ def gen_api_key():
 @req_api_key
 def getdata():
 
-    # checks if api key exists
+    # checks if api key exists in the header
     if request.headers['X_API_KEY']:
+
         data = {}
+
+        # retrieves the api key from the header
         token = request.headers['X_API_KEY']
 
         # sql query to check if the api key exists
-        cur.execute('SELECT * FROM vendor WHERE token=%s',(token,))
+        cur.execute('SELECT * FROM v WHERE token=%s',(token,))
         obj = cur.fetchone()
 
+        # if it does not exist, it returns an error
         if obj is None:
             return jsonify({'error':'create a token first'})
 
         else:
-
             # nests the sql query to format users that are registered for the event
             vid = obj[0]
-            cur.execute('SELECT * FROM events WHERE vid=%s', (vid,))
+
+            # sql query to get the event based on the vendor id
+            cur.execute('SELECT * FROM e WHERE vid=%s', (vid,))
             obj = [cur.fetchone()]
             print(obj)
 
-            # sql query to get the event name and id
             for i,event in enumerate(obj):
+
+                # retrieving the event id
+                id = event[0] 
                 
-                id = event[2]                       # change to event id
-                cur.execute('SELECT id,name FROM uses WHERE id=%s', (id,))
+                # sql query to get the users that are registered for the event
+                cur.execute('SELECT id,name FROM u WHERE eventid=%s', (id,))
                 data[i] = [{"event":event},{"user":cur.fetchone()}]
 
             return jsonify({'Registered':data})
@@ -128,18 +135,25 @@ def eventcreate():
         return jsonify({"error":"provide an apikey"})
 
     try:
-
+        
+        # sql query to check if the api key exists
         cur.execute('SELECT id FROM v WHERE token=%s', (key,))
-    except:
+
+    except Exception as e:
+        # if there is an error, it will rollback the changes
+        connection.rollback()
+        print(e)
+
         return jsonify({'error':'server side'})
 
     vendorid= cur.fetchone()[0]
-    print(vendorid)
+    #print(vendorid)
 
-        
+    # sql query to insert the event into the database
     cur.execute('INSERT INTO e (name,date,vid) values(%s,%s,%s)',(eventname,eventtime,vendorid))
     connection.commit()
-    return jsonify({'response':'new event added sucessfully'})
+
+    return jsonify({'result':True})
 
 
 
