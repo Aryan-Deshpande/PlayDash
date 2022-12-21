@@ -15,10 +15,10 @@ def connect():
     # creating a connection cursor to execute SQL commands
     cur = connection.cursor()
 
-    '''cur.execute('CREATE TABLE IF NOT EXISTS vendor ( id SERIAL PRIMARY KEY, vname VARCHAR(50), uname VARCHAR(50), password VARCHAR(50), token VARCHAR(50))')
+    cur.execute('CREATE TABLE IF NOT EXISTS vendor ( id SERIAL PRIMARY KEY, vname VARCHAR(50), uname VARCHAR(50), password VARCHAR(50), token VARCHAR(50))')
     cur.execute('CREATE TABLE IF NOT EXISTS events ( id SERIAL PRIMARY KEY, name VARCHAR(50), vid INTEGER, FOREIGN KEY (vid) REFERENCES v(id))')
     cur.execute('CREATE TABLE IF NOT EXISTS user ( id SERIAL PRIMARY KEY, name VARCHAR(50), password VARCHAR(50), eventid INTEGER, FOREIGN KEY (eventid) REFERENCES e(id))')
-    connection.commit()'''
+    connection.commit()
 
     return cur, connection
 
